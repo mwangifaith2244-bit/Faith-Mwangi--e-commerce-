@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Payment Successful{% endblock %}
+{% block content %}
+<section class="success">
+<div class="check">✓</div>
+<h1>Order placed successfully!</h1>
+<p>Thank you, {{ name }}.</p>
+<p>Order number: <strong>#{{ order_id }}</strong></p>
+<p>Amount: <strong>KSh {{ "%.2f"|format(total) }}</strong></p>
+<p>Payment status: <strong>PAID - DEMO MPESA</strong></p>
+<p>A real M-PESA STK Push can be connected when Safaricom Daraja credentials are available.</p>
+<a class="btn" href="{{ url_for('products') }}">Continue Shopping</a>
+</section>
+{% endblock %}
