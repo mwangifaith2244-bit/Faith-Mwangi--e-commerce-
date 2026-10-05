@@ -39,13 +39,13 @@ def init_db():
     count = conn.execute("SELECT COUNT(*) FROM products").fetchone()[0]
     if count == 0:
         products = [
-            ("Classic Sneakers", "Shoes", "Comfortable everyday sneakers.", 2500, "sneakers.jpg"),
-            ("Ladies Handbag", "Bags", "Stylish handbag for everyday use.", 1800, "handbag.jpg"),
-            ("Cotton Hoodie", "Clothing", "Warm unisex cotton hoodie.", 2200, "hoodie.jpg"),
-            ("Smart Watch", "Electronics", "Affordable smartwatch with useful daily features.", 3500, "watch.jpg"),
-            ("Wireless Earbuds", "Electronics", "Compact wireless earbuds.", 2000, "earbuds.jpg"),
-            ("Denim Jacket", "Clothing", "Classic denim jacket.", 3000, "jacket.jpg"),
-        ]
+    ("Classic Sneakers", "Shoes", "Comfortable everyday sneakers.", 2500, "classic-sneakers.jpg"),
+    ("Ladies Handbag", "Bags", "Stylish handbag for everyday use.", 1800, "ladies-handbag.jpg"),
+    ("Cotton Hoodie", "Clothing", "Warm unisex cotton hoodie.", 2200, "cotton-hoodie.jpg"),
+    ("Smart Watch", "Electronics", "Affordable smartwatch with useful daily features.", 3500, "smart-watch.jpg"),
+    ("Wireless Earbuds", "Electronics", "Compact wireless earbuds.", 2000, "wireless-earbuds.jpg"),
+    ("Denim Jacket", "Clothing", "Classic denim jacket.", 3000, "denim-jacket.jpg"),
+    ]
         conn.executemany(
             "INSERT INTO products (name, category, description, price, image) VALUES (?, ?, ?, ?, ?)",
             products
