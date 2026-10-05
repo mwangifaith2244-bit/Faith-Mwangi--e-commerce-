@@ -119,6 +119,10 @@ def init_db():
     conn.close()
 
 
+# Initialize the database when Render starts the application
+init_db()
+
+
 @app.route("/")
 def index():
     conn = get_db()
@@ -478,5 +482,8 @@ def inject_cart_count():
 
 
 if __name__ == "__main__":
-    init_db()
     app.run(debug=True)
+
+Now, sis, copy that entire code into GitHub → "app.py" → Edit → Select all → paste → Commit changes.
+
+After committing, do not manually deploy yet. Send me a screenshot of the new commit/Render deploy, and I'll guide you through the next step.
