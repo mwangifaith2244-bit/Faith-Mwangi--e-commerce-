@@ -119,7 +119,6 @@ def init_db():
     conn.close()
 
 
-# Initialize the database when Render starts the application
 init_db()
 
 
@@ -266,7 +265,6 @@ def add_to_cart(product_id):
     )
 
     cart = session.get("cart", {})
-
     key = str(product_id)
 
     cart[key] = int(
@@ -304,10 +302,7 @@ def checkout():
 
     if not items:
         flash("Your cart is empty.")
-
-        return redirect(
-            url_for("products")
-        )
+        return redirect(url_for("products"))
 
     if request.method == "POST":
         name = request.form["name"].strip()
@@ -448,10 +443,7 @@ def admin_add():
     )
 
 
-@app.route(
-    "/admin/delete/<int:product_id>",
-    methods=["POST"]
-)
+@app.route("/admin/delete/<int:product_id>", methods=["POST"])
 def admin_delete(product_id):
     conn = get_db()
 
@@ -483,7 +475,3 @@ def inject_cart_count():
 
 if __name__ == "__main__":
     app.run(debug=True)
-
-Now, sis, copy that entire code into GitHub → "app.py" → Edit → Select all → paste → Commit changes.
-
-After committing, do not manually deploy yet. Send me a screenshot of the new commit/Render deploy, and I'll guide you through the next step.
