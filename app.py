@@ -88,7 +88,7 @@ def init_db():
                 "Classic denim jacket.",
                 3000,
                 "css/denim-jacket.jpg"
-            ),
+            )
         ]
 
         conn.executemany(
@@ -100,14 +100,13 @@ def init_db():
             products
         )
 
-    # Update image filenames for products already in the database
     image_updates = {
         "Classic Sneakers": "css/classic-sneaker.jpg",
         "Ladies Handbag": "css/ladies-handbag.jpg",
         "Cotton Hoodie": "css/cotton-hoodie.jpg",
         "Smart Watch": "css/smart-watch.jpg",
         "Wireless Earbuds": "css/wireless-earbuds.jpg",
-        "Denim Jacket": "css/denim-jacket.jpg",
+        "Denim Jacket": "css/denim-jacket.jpg"
     }
 
     for name, image in image_updates.items():
@@ -281,4 +280,203 @@ def add_to_cart(product_id):
 
 @app.route("/cart/remove/<int:product_id>")
 def remove_from_cart(product_id):
-    cart = session.get("cart",
+    cart = session.get("cart", {})
+
+    cart.pop(
+        str(product_id),
+        None
+    )
+
+    session["cart"] = cart
+
+    return redirect(
+        url_for("cart")
+    )
+
+
+@app.route("/checkout", methods=["GET", "POST"])
+def checkout():
+    items, total = cart_items()
+
+    if not items:
+        flash("Your cart is empty.")
+
+        return redirect(
+            url_for("products")
+        )
+
+    if request.method == "POST":
+        name = request.form["name"].strip()
+        phone = request.form["phone"].strip()
+        address = request.form["address"].strip()
+
+        if not name or not phone or not address:
+            flash("Please fill in all checkout details.")
+
+            return render_template(
+                "checkout.html",
+                items=items,
+                total=total
+            )
+
+        conn = get_db()
+
+        cur = conn.execute(
+            """
+            INSERT INTO orders
+            (
+                customer_name,
+                phone,
+                address,
+                total,
+                payment_status
+            )
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (
+                name,
+                phone,
+                address,
+                total,
+                "PAID - DEMO MPESA"
+            )
+        )
+
+        order_id = cur.lastrowid
+
+        conn.commit()
+        conn.close()
+
+        session["cart"] = {}
+
+        return render_template(
+            "success.html",
+            order_id=order_id,
+            total=total,
+            phone=phone,
+            name=name
+        )
+
+    return render_template(
+        "checkout.html",
+        items=items,
+        total=total
+    )
+
+
+@app.route("/orders")
+def orders():
+    conn = get_db()
+
+    rows = conn.execute(
+        """
+        SELECT * FROM orders
+        ORDER BY id DESC
+        """
+    ).fetchall()
+
+    conn.close()
+
+    return render_template(
+        "orders.html",
+        orders=rows
+    )
+
+
+@app.route("/admin")
+def admin():
+    conn = get_db()
+
+    rows = conn.execute(
+        """
+        SELECT * FROM products
+        ORDER BY id DESC
+        """
+    ).fetchall()
+
+    conn.close()
+
+    return render_template(
+        "admin.html",
+        products=rows
+    )
+
+
+@app.route("/admin/add", methods=["POST"])
+def admin_add():
+    name = request.form["name"].strip()
+    category = request.form["category"].strip()
+    description = request.form["description"].strip()
+    price = float(request.form["price"])
+
+    image = request.form.get(
+        "image",
+        "placeholder.jpg"
+    ).strip()
+
+    if not image:
+        image = "placeholder.jpg"
+
+    conn = get_db()
+
+    conn.execute(
+        """
+        INSERT INTO products
+        (name, category, description, price, image)
+        VALUES (?, ?, ?, ?, ?)
+        """,
+        (
+            name,
+            category,
+            description,
+            price,
+            image
+        )
+    )
+
+    conn.commit()
+    conn.close()
+
+    flash("Product added.")
+
+    return redirect(
+        url_for("admin")
+    )
+
+
+@app.route(
+    "/admin/delete/<int:product_id>",
+    methods=["POST"]
+)
+def admin_delete(product_id):
+    conn = get_db()
+
+    conn.execute(
+        "DELETE FROM products WHERE id = ?",
+        (product_id,)
+    )
+
+    conn.commit()
+    conn.close()
+
+    flash("Product deleted.")
+
+    return redirect(
+        url_for("admin")
+    )
+
+
+@app.context_processor
+def inject_cart_count():
+    cart = session.get("cart", {})
+
+    return {
+        "cart_count": sum(
+            int(q) for q in cart.values()
+        )
+    }
+
+
+if __name__ == "__main__":
+    init_db()
+    app.run(debug=True)
